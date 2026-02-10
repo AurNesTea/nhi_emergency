@@ -124,20 +124,35 @@ class NHIMedicalCenterScraper:
         try:
             driver_path = ChromeDriverManager().install()
             
-            # 修正 macOS 上的路徑問題
-            if 'chromedriver-mac' in driver_path:
-                # 找到實際的 chromedriver 執行檔
-                import os
+            # 修正路徑問題 (解決 Windows/Mac 可能抓到 LICENSE/NOTICE 檔案導致的 WinError 193)
+            import os
+            basename = os.path.basename(driver_path)
+            
+            # 檢查是否為正確的執行檔名稱
+            expected_names = ['chromedriver', 'chromedriver.exe']
+            if basename.lower() not in expected_names:
+                logger.warning(f"webdriver-manager 返回的路徑可能非執行檔: {driver_path}，嘗試搜尋實際執行檔...")
                 driver_dir = os.path.dirname(driver_path)
+                found = False
                 for root, dirs, files in os.walk(driver_dir):
-                    if 'chromedriver' in files:
-                        driver_path = os.path.join(root, 'chromedriver')
+                    for filename in files:
+                        if filename.lower() in expected_names:
+                            driver_path = os.path.join(root, filename)
+                            found = True
+                            break
+                    if found:
                         break
                 
-                # 確保有執行權限
+                if found:
+                    logger.info(f"已修正 ChromeDriver 路徑: {driver_path}")
+                else:
+                    logger.error(f"在 {driver_dir} 中找不到 chromedriver 執行檔")
+
+            # macOS/Linux 需要給予執行權限
+            if os.name != 'nt':
                 os.chmod(driver_path, 0o755)
-                logger.info(f"使用 ChromeDriver: {driver_path}")
             
+            # Service 初始化
             service = Service(driver_path)
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
