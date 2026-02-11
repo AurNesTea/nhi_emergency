@@ -14,7 +14,7 @@
 ### 1. 定時排程 (Scheduling)
 - [x] 建立 Windows 排程腳本 (`run_scraper.bat`)
 - [x] 提供工作排程器設定指南 (詳見 `docs/DEPLOYMENT.md`)
-- [x] 執行時間:每日 **09:00** 與 **16:00**
+- [x] 執行時間:每日 **09:00** 與 **16:00** (已於 Windows 10 環境驗證)
 
 ### 2. 資料累積 (Data Accumulation)
 - [x] 建立「歷史資料庫」機制 (`medical_centers_history.json`)

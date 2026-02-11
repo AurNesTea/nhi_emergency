@@ -33,7 +33,7 @@
 
 將整個專案資料夾複製到 Windows 電腦,建議路徑:
 ```
-C:\Projects\健保署醫學中心爬蟲\
+C:\Projects\nhi_emergency\
 ```
 
 ### Step 2: 建立虛擬環境
@@ -41,7 +41,7 @@ C:\Projects\健保署醫學中心爬蟲\
 開啟 **命令提示字元 (CMD)** 或 **PowerShell**,切換到專案目錄:
 
 ```cmd
-cd C:\Projects\健保署醫學中心爬蟲
+cd C:\Projects\nhi_emergency
 python -m venv venv
 ```
 
@@ -132,7 +132,7 @@ python test_email_config.py
 
 #### 2. 建立基本工作
 1. 點選右側 **「建立基本工作」**
-2. 名稱: `健保署醫學中心爬蟲 - 早上`
+2. 名稱: `nhi_emergency - 早上`
 3. 描述: `每日 09:00 自動抓取醫學中心資料`
 4. 點選 **下一步**
 
@@ -144,11 +144,11 @@ python test_email_config.py
 #### 4. 設定動作
 1. 選擇 **「啟動程式」**
 2. 程式或指令碼: 瀏覽並選擇 `run_scraper.bat`
-   - 完整路徑範例: `C:\Projects\健保署醫學中心爬蟲\run_scraper.bat`
+   - 完整路徑範例: `C:\Projects\nhi_emergency\run_scraper.bat`
 3. 點選 **下一步** → **完成**
 
 #### 5. 重複步驟建立下午排程
-- 名稱: `健保署醫學中心爬蟲 - 下午`
+- 名稱: `nhi_emergency - 下午`
 - 時間: `16:00:00`
 
 ### 方法二: 使用命令列 (進階)
@@ -157,10 +157,10 @@ python test_email_config.py
 
 ```cmd
 :: 早上 09:00 排程
-schtasks /create /tn "健保署爬蟲-早上" /tr "C:\Projects\健保署醫學中心爬蟲\run_scraper.bat" /sc daily /st 09:00
+schtasks /create /tn "健保署爬蟲-早上" /tr "C:\Projects\nhi_emergency\run_scraper.bat" /sc daily /st 09:00
 
 :: 下午 16:00 排程
-schtasks /create /tn "健保署爬蟲-下午" /tr "C:\Projects\健保署醫學中心爬蟲\run_scraper.bat" /sc daily /st 16:00
+schtasks /create /tn "健保署爬蟲-下午" /tr "C:\Projects\nhi_emergency\run_scraper.bat" /sc daily /st 16:00
 ```
 
 ### 驗證排程設定
@@ -175,7 +175,7 @@ schtasks /create /tn "健保署爬蟲-下午" /tr "C:\Projects\健保署醫學�
 ## 檔案結構說明
 
 ```
-C:\Projects\健保署醫學中心爬蟲\
+C:\Projects\nhi_emergency\
 ├── nhi_scraper.py              # 主程式
 ├── config.py                   # 設定檔 (Email, 重試次數等)
 ├── requirements.txt            # Python 依賴套件

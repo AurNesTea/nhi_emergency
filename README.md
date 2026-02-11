@@ -1,7 +1,7 @@
 # 健保署醫學中心爬蟲 (NHI Medical Center Scraper)
 
-> **專案狀態**: Production Ready (v2.1)  
-> **最新更新**: 2026-02-10 (Email Notification Verified)  
+> **專案狀態**: Production Ready (v2.2)  
+> **最新更新**: 2026-02-10 (Windows Scheduling Verified)  
 > **交付日期**: 2026-02-13
 
 ## 專案概述
@@ -32,7 +32,7 @@
 ```bash
 # Clone 專案
 git clone [repository_url]
-cd 健保署醫學中心爬蟲
+cd nhi_emergency
 
 # 建立虛擬環境 (建議)
 # macOS / Linux
@@ -98,7 +98,7 @@ python test_email_config.py
 ## 專案結構
 
 ```
-健保署醫學中心爬蟲/
+nhi_emergency/
 ├── docs/                 # 專案文件
 │   ├── DEPLOYMENT.md     # Windows 部署指南
 │   ├── ROADMAP.md        # 開發路線圖

@@ -9,11 +9,14 @@ echo ===========================================
 cd /d "%~dp0"
 
 :: 檢查虛擬環境是否存在
-if exist "venv\Scripts\python.exe" (
-    echo 使用虛擬環境執行...
-    venv\Scripts\python.exe nhi_scraper.py
+if exist ".venv\Scripts\python.exe" (
+    echo 使用 .venv 虛擬環境執行...
+    ".venv\Scripts\python.exe" nhi_scraper.py
+) else if exist "venv\Scripts\python.exe" (
+    echo 使用 venv 虛擬環境執行...
+    "venv\Scripts\python.exe" nhi_scraper.py
 ) else (
-    echo 找不到虛擬環境，嘗試使用系統 Python...
+    echo 找不到虛擬環境 (.venv 或 venv)，嘗試使用系統 Python...
     python nhi_scraper.py
 )
 
