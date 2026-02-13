@@ -35,3 +35,4 @@ backup/
 .env
 google_credentials.json
 postgres_data/
+import_history.py
