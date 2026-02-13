@@ -35,3 +35,16 @@ services:
       - ./logs:/app/logs
       # 同步本地程式碼以便開發調試 (可選)
       - .:/app
+
+  # ngrok 隧道服務
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: always
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command:
+      - tcp
+      - db:5432
+    depends_on:
+      db:
+        condition: service_healthy
