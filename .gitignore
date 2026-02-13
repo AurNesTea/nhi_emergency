@@ -30,3 +30,8 @@ config.py
 logs/
 data/
 .DS_Store
+utils/
+backup/
+.env
+google_credentials.json
+postgres_data/

@@ -122,38 +122,49 @@ class NHIMedicalCenterScraper:
         
         # 自動下載並設定 ChromeDriver
         try:
-            driver_path = ChromeDriverManager().install()
-            
-            # 修正路徑問題 (解決 Windows/Mac 可能抓到 LICENSE/NOTICE 檔案導致的 WinError 193)
+            # 優先檢查環境變數 (Docker 環境)
             import os
-            basename = os.path.basename(driver_path)
-            
-            # 檢查是否為正確的執行檔名稱
-            expected_names = ['chromedriver', 'chromedriver.exe']
-            if basename.lower() not in expected_names:
-                logger.warning(f"webdriver-manager 返回的路徑可能非執行檔: {driver_path}，嘗試搜尋實際執行檔...")
-                driver_dir = os.path.dirname(driver_path)
-                found = False
-                for root, dirs, files in os.walk(driver_dir):
-                    for filename in files:
-                        if filename.lower() in expected_names:
-                            driver_path = os.path.join(root, filename)
-                            found = True
-                            break
-                    if found:
-                        break
-                
-                if found:
-                    logger.info(f"已修正 ChromeDriver 路徑: {driver_path}")
-                else:
-                    logger.error(f"在 {driver_dir} 中找不到 chromedriver 執行檔")
+            chrome_bin = os.environ.get('CHROME_BIN')
+            chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
 
-            # macOS/Linux 需要給予執行權限
-            if os.name != 'nt':
-                os.chmod(driver_path, 0o755)
-            
-            # Service 初始化
-            service = Service(driver_path)
+            if chrome_bin and chromedriver_path:
+                logger.info(f"使用系統內建 Chromium: {chrome_bin}")
+                chrome_options.binary_location = chrome_bin
+                service = Service(chromedriver_path)
+            else:
+                # 本機環境使用 webdriver-manager
+                driver_path = ChromeDriverManager().install()
+                
+                # 修正路徑問題 (解決 Windows/Mac 可能抓到 LICENSE/NOTICE 檔案導致的 WinError 193)
+                basename = os.path.basename(driver_path)
+                
+                # 檢查是否為正確的執行檔名稱
+                expected_names = ['chromedriver', 'chromedriver.exe']
+                if basename.lower() not in expected_names:
+                    logger.warning(f"webdriver-manager 返回的路徑可能非執行檔: {driver_path}，嘗試搜尋實際執行檔...")
+                    driver_dir = os.path.dirname(driver_path)
+                    found = False
+                    for root, dirs, files in os.walk(driver_dir):
+                        for filename in files:
+                            if filename.lower() in expected_names:
+                                driver_path = os.path.join(root, filename)
+                                found = True
+                                break
+                        if found:
+                            break
+                    
+                    if found:
+                        logger.info(f"已修正 ChromeDriver 路徑: {driver_path}")
+                    else:
+                        logger.error(f"在 {driver_dir} 中找不到 chromedriver 執行檔")
+
+                # macOS/Linux 需要給予執行權限
+                if os.name != 'nt':
+                    os.chmod(driver_path, 0o755)
+                
+                service = Service(driver_path)
+
+            # Service 初始化 (共用)
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             
             # 設定超時時間
@@ -347,32 +358,65 @@ class NHIMedicalCenterScraper:
         
         return output_file
     
-    def save_to_history(self):
-        """將資料累積至歷史檔案"""
+    def save_to_database(self):
+        """
+        將資料寫入 PostgreSQL 資料庫
+        此方法包含獨立的錯誤處理，確保不影響主程式流程
+        """
         if not self.data:
             return
-            
+
+        logger.info("正在將資料寫入資料庫...")
+        
+        # 延遲匯入以避免循環引用或在無資料庫依賴環境下報錯
         try:
-            # 讀取現有資料
-            existing_data = []
-            if HISTORY_FILE.exists():
-                with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
-                    try:
-                        existing_data = json.load(f)
-                    except json.JSONDecodeError:
-                        logger.warning("歷史檔案格式錯誤，將建立新檔案")
+            from database import SessionLocal, init_db
+            from models import MedicalCenterRecord
             
-            # 追加新資料
-            existing_data.extend(self.data)
-            
-            # 寫入檔案
-            with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
-                json.dump(existing_data, f, ensure_ascii=False, indent=2)
+            # 嘗試初始化資料表（如果還沒建立）
+            try:
+                init_db()
+            except Exception as e:
+                logger.warning(f"資料庫初始化警告 (可能已存在或連線失敗): {e}")
+
+            db = SessionLocal()
+            try:
+                for record in self.data:
+                    # 轉換資料格式以符合模型
+                    # 注意：record['滿床通報狀態'] 是 "是"/"否" 字串，需轉換為 Boolean
+                    is_full_bed = True if "是" in record.get('滿床通報狀態', '') else False
+                    
+                    # 轉換數字欄位 (移除可能的非數字字符)
+                    def parse_int(value):
+                        try:
+                            return int(value)
+                        except (ValueError, TypeError):
+                            return 0
+
+                    db_record = MedicalCenterRecord(
+                        hospital_name=record.get('醫院簡稱'),
+                        inpatient_waiting=parse_int(record.get('住院等待人數')),
+                        outpatient_waiting=parse_int(record.get('看診等待人數')),
+                        stretcher_waiting=parse_int(record.get('推床等待人數')),
+                        icu_waiting=parse_int(record.get('加護病房等待人數')),
+                        is_full_bed=is_full_bed,
+                        created_at=datetime.strptime(record.get('抓取時間'), '%Y-%m-%d %H:%M:%S')
+                    )
+                    db.add(db_record)
                 
-            logger.info(f"已將 {len(self.data)} 筆資料追加至歷史檔案: {HISTORY_FILE}")
-            
+                db.commit()
+                logger.info(f"成功寫入 {len(self.data)} 筆資料至資料庫")
+                
+            except Exception as e:
+                logger.error(f"寫入資料庫時發生錯誤: {e}")
+                db.rollback()
+            finally:
+                db.close()
+                
+        except ImportError:
+            logger.error("無法匯入資料庫模組，請檢查是否已安裝 SQLAlchemy 與 psycopg2-binary")
         except Exception as e:
-            logger.error(f"儲存歷史資料時發生錯誤: {e}")
+            logger.error(f"資料庫連線或操作失敗: {e}")
 
     def send_email(self, attachment_path):
         """發送 Email 通知"""
@@ -453,12 +497,14 @@ class NHIMedicalCenterScraper:
             csv_file = self.save_to_csv()
             json_file = self.save_to_json()
             
-            # 9. 累積歷史資料
-            self.save_to_history()
-            
-            # 10. 發送 Email 通知
+            # 9. 發送 Email 通知 (優先於資料庫寫入)
             if csv_file:
+                logger.info("正在發送 Email 通知...")
                 self.send_email(csv_file)
+
+            # 10. 寫入資料庫 (隔離錯誤)
+            logger.info("正在寫入資料庫...")
+            self.save_to_database()
             
             # 統計資訊
             end_time = datetime.now()

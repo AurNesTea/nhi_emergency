@@ -33,13 +33,18 @@
 - [x] 資料驗證功能 (確保抓取 28 筆醫學中心)
 - [x] 詳細錯誤日誌記錄
 
-## 第三階段：視覺化與資料庫 (Future)
-> 目標：建立現代化的網頁介面與穩健的後端資料庫架構。
+## 第三階段：資料庫整合 (Completed - v3.0)
+> **完成日期**: 2026-02-13
+> **目標**: 引入 ORM 架構與 PostgreSQL 資料庫，建立穩健的資料儲存層。
 
 ### 1. 資料庫建置 (ORM Architecture)
-- [ ] 引入 ORM (如 SQLAlchemy)
-- [ ] 設計資料庫模型 (MedicalCenter, Record 等)
-- [ ] 遷移現有 JSON/CSV 資料至資料庫 (SQLite/PostgreSQL)
+- [x] 引入 ORM (SQLAlchemy)
+- [x] 設計資料庫模型 (`models.py`)
+- [x] 實作 PostgreSQL 連線邏輯 (`database.py`)
+- [x] 容器化部署 (Docker + docker-compose)
+
+## 第四階段：前端視覺化 (Future)
+> 目標：建立現代化的網頁介面與資訊儀表板。
 
 ### 2. 前端視覺化 (Dashboard)
 - [ ] 設計資訊儀表板 (Dashboard)

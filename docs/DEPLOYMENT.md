@@ -6,7 +6,25 @@
 
 ---
 
-## 部署前準備
+## Docker 部署 (推薦)
+
+這是最穩定且跨平台的部署方式，無需在主機安裝 Python 環境。
+
+### 1. 啟動服務
+```bash
+docker-compose up -d --build
+```
+
+### 2. 管理指令
+*   **查看日誌**: `docker-compose logs -f scraper`
+*   **停止服務**: `docker-compose down`
+*   **進入資料庫**: `docker-compose exec db psql -U postgres -d nhi_emergency`
+
+---
+
+## 部署前準備 (Windows 傳統方式)
+
+若您的環境無法使用 Docker，可使用此傳統部署方式。
 
 ### 1. 確認系統需求
 
@@ -41,14 +59,16 @@ C:\Projects\nhi_emergency\
 開啟 **命令提示字元 (CMD)** 或 **PowerShell**,切換到專案目錄:
 
 ```cmd
-cd C:\Projects\nhi_emergency
-python -m venv venv
+cd D:\Kevin\nhi_emergency
+python -m venv .venv
 ```
+
+> **注意**: 建議直接使用 `.venv` 作為虛擬環境名稱。如果您的路徑不同（例如 `D:\Kevin\nhi_emergency`），請在後續步驟中相應調整。
 
 ### Step 3: 啟動虛擬環境並安裝依賴
 
 ```cmd
-venv\Scripts\activate
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -60,13 +80,14 @@ pip install -r requirements.txt
 ### Step 4: 測試執行
 
 ```cmd
+:: 確保在虛擬環境啟動狀態下執行
 python nhi_scraper.py
 ```
 
 預期結果:
 - 成功抓取 28 筆醫學中心資料
 - 生成 CSV 和 JSON 檔案於 `data/` 目錄
-- 執行時間約 10-15 秒
+- 執行時間約 13-17 秒
 
 ---
 
@@ -144,8 +165,20 @@ python test_email_config.py
 #### 4. 設定動作
 1. 選擇 **「啟動程式」**
 2. 程式或指令碼: 瀏覽並選擇 `run_scraper.bat`
-   - 完整路徑範例: `C:\Projects\nhi_emergency\run_scraper.bat`
-3. 點選 **下一步** → **完成**
+   - 完整路徑範例: `D:\Kevin\nhi_emergency\run_scraper.bat`
+3. **重要設定 - 開始位置 (選用)**: 填入專案根目錄
+   - 範例: `D:\Kevin\nhi_emergency`
+4. 點選 **下一步** → **完成**
+
+#### 5. 排程器效能與穩定性優化 (強烈建議)
+為了確保排程即使在電腦休眠或錯過時間也能執行，請在任務的 **「內容」** 中調整以下設定：
+
+- **「設定」頁籤**：
+    - 勾選 **「在錯過排定的啟動後儘快執行工作」** (確保開機後補跑)。
+    - 修改 **「如果工作執行時間大於以下值即停止」** 為 **1 小時** (防止程式卡死持續佔用資源)。
+- **「條件」頁籤**：
+    - 取消勾選 **「只有在電腦是使用 AC 電源時才啟動」** (確保筆電電池模式也能跑)。
+    - 勾選 **「喚醒電腦以執行此工作」** (嘗試在睡眠狀態下喚醒執行)。
 
 #### 5. 重複步驟建立下午排程
 - 名稱: `nhi_emergency - 下午`
@@ -156,11 +189,8 @@ python test_email_config.py
 開啟 **系統管理員權限的 CMD**,執行:
 
 ```cmd
-:: 早上 09:00 排程
-schtasks /create /tn "健保署爬蟲-早上" /tr "C:\Projects\nhi_emergency\run_scraper.bat" /sc daily /st 09:00
-
-:: 下午 16:00 排程
-schtasks /create /tn "健保署爬蟲-下午" /tr "C:\Projects\nhi_emergency\run_scraper.bat" /sc daily /st 16:00
+schtasks /create /tn "健保署爬蟲-早上" /tr "D:\Kevin\nhi_emergency\run_scraper.bat" /sc daily /st 09:00 /rl highest
+schtasks /create /tn "健保署爬蟲-下午" /tr "D:\Kevin\nhi_emergency\run_scraper.bat" /sc daily /st 16:00 /rl highest
 ```
 
 ### 驗證排程設定
@@ -175,31 +205,33 @@ schtasks /create /tn "健保署爬蟲-下午" /tr "C:\Projects\nhi_emergency\run
 ## 檔案結構說明
 
 ```
-C:\Projects\nhi_emergency\
+D:\Kevin\nhi_emergency\
 ├── nhi_scraper.py              # 主程式
 ├── config.py                   # 設定檔 (Email, 重試次數等)
 ├── requirements.txt            # Python 依賴套件
-├── run_scraper.bat             # Windows 執行腳本
+├── run_scraper.bat             # Windows 執行腳本 (使用絕對路徑最穩定)
+├── .venv/                      # 虛擬環境目錄 (Windows 專用)
 ├── data/                       # 資料輸出目錄
-│   ├── medical_centers_history.json  # 歷史累積資料
-│   └── medical_centers_*.csv         # 每次執行的快照
 └── logs/                       # 日誌目錄
-    └── scraper.log             # 執行日誌
 ```
 
 ---
 
 ## 常見問題排除
 
-### Q1: 執行時出現 `ModuleNotFoundError`
-
-**原因**: 虛擬環境未啟動或套件未安裝
+**原因**: 虛擬環境未啟動、路徑名稱不符（例如腳本找 `venv` 但實際名稱是 `.venv`）或套件未安裝。
 
 **解決方法**:
+確認 `run_scraper.bat` 中的路徑與實際一致，並重新安裝套件：
 ```cmd
-venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+### Q1.5: 跨平台同步導致的執行失敗
+**原因**: 從 Mac/Linux 透過 OneDrive 或 GitHub 同步了 `.venv` 資料夾。
+**解決方法**: 虛擬環境**不可跨作業系統共用**。請在 Windows 上刪除同步過來的 `.venv` 資料夾，並依照上面的步驟重新建立 Windows 版環境。
 
 ### Q2: ChromeDriver 版本不符
 

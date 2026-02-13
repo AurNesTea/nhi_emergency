@@ -1,96 +1,82 @@
 # 健保署醫學中心爬蟲 (NHI Medical Center Scraper)
 
-> **專案狀態**: Production Ready (v2.2)  
-> **最新更新**: 2026-02-10 (Windows Scheduling Verified)  
-> **交付日期**: 2026-02-13
+> **專案狀態**: Production Ready (v3.0 - Database & Docker Support)  
+> **最新更新**: 2026-02-13  
+> **技術核心**: Python 3.10, Selenium, PostgreSQL, Docker
 
 ## 專案概述
 
-本專案旨在自動化抓取健保署網站上全台 28 家醫學中心的即時等待人數資料，並支援自動化排程與通知功能。程式經過優化，可一次性抓取全國資料，無需遍歷縣市，執行速度極快（約 10-15 秒）。
+本專案旨在自動化抓取健保署網站上全台 28 家醫學中心的即時等待人數資料，並支援自動化排程、Email 通知與資料庫長期儲存。
 
 **主要功能：**
-*   **高效爬蟲**: 使用 Selenium + Headless Chrome，單次執行僅需約 13 秒。
-*   **完整數據**: 抓取住院、看診、推床、加護病房等待人數及滿床通報狀態。
-*   **自動化重試**: 內建 `@retry_on_failure` 機制，遇到網絡波動自動重試。
-*   **資料驗證**: 自動檢查抓取筆數（預期 28 筆），確保資料完整性。
-*   **歷史累積**: 每次執行自動追加新資料至 `medical_centers_history.json`。
-*   **Email 通知**: 支援 SMTP 發信及附件傳送，可設定多位收件人。
-*   **Windows 排程**: 提供批次檔與部署指南，輕鬆設定每日自動執行。
+*   **高效爬蟲**: 使用 Selenium + Headless Chrome，支援自動重試與錯誤隔離。
+*   **混合儲存**:
+    *   **資料庫**: 透過 SQLAlchemy ORM 寫入 PostgreSQL，適合長期分析。
+    *   **檔案備份**: 保留 CSV 與 JSON 格式的單次快照。
+*   **容器化部署**: 提供 `Dockerfile` 與 `docker-compose.yml`，一鍵啟動所有服務 (App + DB)。
+*   **模組化架構**: 分離基礎建設 (`database.py`) 與業務模型 (`models.py`)，便於擴充。
+*   **Email 通知**: 抓取完成後自動寄送報表，即使資料庫連線失敗也能獨立運作。
 
 **資料來源**: [健保署特約醫療院所資訊查詢](https://info.nhi.gov.tw/INAE4000/INAE4001S01)
 
 ---
 
-## 快速開始
+## 快速開始 (推薦使用 Docker)
+
+這是最簡單的部署方式，無需在本機安裝 Python 或 Chrome。
 
 ### 1. 環境需求
-*   Python 3.10+
-*   Google Chrome 瀏覽器
+*   Docker Desktop (Windows/Mac) 或 Docker Engine (Linux)
 
-### 2. 安裝步驟
+### 2. 啟動服務
 
 ```bash
-# Clone 專案
+# 下載專案
 git clone [repository_url]
 cd nhi_emergency
 
-# 建立虛擬環境 (建議)
-# macOS / Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# 安裝依賴套件
-pip install -r requirements.txt
+# 啟動服務 (背景執行)
+docker-compose up -d --build
 ```
 
-> **注意**：`webdriver-manager` 會在首次執行時自動下載 ChromeDriver。
+此指令將自動：
+1.  啟動 PostgreSQL 資料庫 (主機埠 5432)
+2.  建置並啟動爬蟲容器
+3.  自動執行第一次抓取
+4.  將資料與日誌掛載回本機 (`data/` 與 `logs/`)
 
-### 3. 執行爬蟲
+### 3. 查看狀態
 
 ```bash
-python nhi_scraper.py
-```
+# 查看爬蟲日誌
+docker-compose logs -f scraper
 
-### 4. 輸出結果
-資料會自動儲存於 `data/` 目錄：
-*   **單次快照 (CSV)**: `data/medical_centers_{YYYYMMDD_HHMMSS}.csv`
-*   **單次快照 (JSON)**: `data/medical_centers_{YYYYMMDD_HHMMSS}.json`
-*   **歷史累積**: `data/medical_centers_history.json` (所有歷史數據)
+# 檢查資料庫內容
+docker-compose exec db psql -U postgres -d nhi_emergency -c "SELECT * FROM medical_center_records ORDER BY id DESC LIMIT 5;"
+```
 
 ---
 
-## 設定說明 (`config.py`)
+## 傳統部署 (Windows/Mac 本機執行)
 
-您可以在 `config.py` 中調整各項參數：
+若不使用 Docker，請參考以下步驟：
 
-*   **SELENIUM_CONFIG**: 設定 Headless 模式、等待超時等。
-*   **SCRAPER_CONFIG**: 設定每頁顯示筆數、重試次數。
-*   **EMAIL_CONFIG**: 設定 SMTP 伺服器、帳號密碼及收件人。
+### 1. 安裝與設定
+```bash
+# 建立虛擬環境
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-### Email 通知設定範例
-若需開啟通知功能，請修改 `config.py`：
-
-```python
-EMAIL_CONFIG = {
-    "enabled": True,                   # ⚠️ 務必改為 True 才能啟用
-    "smtp_server": "smtp.gmail.com",   # Gmail 設定範例
-    "smtp_port": 587,
-    "sender_email": "your_email@gmail.com",
-    "sender_password": "your_app_password",  # 應用程式密碼
-    "receiver_emails": ["receiver@example.com"],
-    "subject_prefix": "[健保署爬蟲通知]",
-}
+# 安裝依賴 (包含 selenium, sqlalchemy, psycopg2)
+pip install -r requirements.txt
 ```
 
-### 測試 Email 設定
-本專案提供測試工具，設定完成後可執行以下指令驗證：
+### 2. 資料庫設定 (選用)
+若需寫入資料庫，請確保本機有 PostgreSQL 服務，並設定 `.env` 或環境變數。若無資料庫，程式會自動略過寫入步驟，僅產出 CSV。
 
+### 3. 執行爬蟲
 ```bash
-python test_email_config.py
+python nhi_scraper.py
 ```
 
 ---
@@ -99,19 +85,17 @@ python test_email_config.py
 
 ```
 nhi_emergency/
-├── docs/                 # 專案文件
-│   ├── DEPLOYMENT.md     # Windows 部署指南
-│   ├── ROADMAP.md        # 開發路線圖
-│   └── README.md         # 主要說明文件
-├── data/                 # 資料儲存
-│   ├── medical_centers_history.json  # 累積歷史資料
-│   └── medical_centers_*.csv         # 單次抓取備份
+├── data/                 # 資料輸出 (CSV/JSON)
 ├── logs/                 # 系統日誌
-│   └── scraper.log       # 執行紀錄
+├── docs/                 # 專案文件
+├── utils/                # 工具腳本 (如 Email 測試)
+├── database.py           # 資料庫連線模組
+├── models.py             # 資料庫模型定義
 ├── nhi_scraper.py        # 核心爬蟲程式
-├── config.py             # 設定檔 (含 Email 設定)
-├── requirements.txt      # Python 依賴
-└── run_scraper.bat       # Windows 自動執行腳本
+├── config.py             # 設定檔
+├── Dockerfile            # 容器定義
+├── docker-compose.yml    # 服務編排
+└── requirements.txt      # Python 依賴
 ```
 
 ---
