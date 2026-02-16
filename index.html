@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全台醫學中心急診即時監控面板</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #38bdf8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--primary), #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .last-update {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            text-align: right;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+        }
+
+        .stat-card.danger::after {
+            background: var(--danger);
+        }
+
+        .stat-card.warning::after {
+            background: var(--warning);
+        }
+
+        .hospital-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .full-bed-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 2rem;
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .metric-value.high {
+            color: var(--danger);
+        }
+
+        .metric-value.med {
+            color: var(--warning);
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* 響應式 */
+        @media (max-width: 992px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-title">
+                <h1>NHI Emergency Guard</h1>
+                <p>醫學中心急診即時戰情室</p>
+            </div>
+            <div class="last-update" id="last-update">
+                資料更新日期：載入中...<br>
+                更新頻率：每日 09:00, 16:00
+            </div>
+        </header>
+
+        <section class="overview">
+            <h2>即時告警 (住院等待 > 30人)</h2>
+            <div class="stats-grid" id="alert-grid">
+                <!-- 警告卡片由 JS 動態生成 -->
+            </div>
+        </section>
+
+        <div class="dashboard-content">
+            <div class="main-visual">
+                <div class="chart-container">
+                    <h2>住院等待趨勢 (前五名)</h2>
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+            <div class="side-panel">
+                <h2>所有中心概覽</h2>
+                <div id="full-list" style="max-height: 800px; overflow-y: auto; padding-right: 0.5rem;">
+                    <!-- 列表由 JS 生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入資料 -->
+    <script src="data.js"></script>
+    <script>
+        // 初始化儀表板
+        function initDashboard() {
+            if (typeof scraperData === 'undefined') {
+                console.error("找不到 scraperData 資料");
+                return;
+            }
+
+            const latestBatchTimes = scraperData[scraperData.length - 1].date;
+            document.getElementById('last-update').innerHTML = `資料更新日期：${latestBatchTimes}<br>更新頻率：每日 09:00, 16:00`;
+
+            const latestData = scraperData[scraperData.length - 1].records;
+
+            // 1. 處理警告卡片
+            const alertGrid = document.getElementById('alert-grid');
+            const alertHospitals = latestData.filter(h => parseInt(h.inpatient_waiting) > 30);
+
+            alertGrid.innerHTML = alertHospitals.map(h => `
+                <div class="stat-card danger">
+                    <div class="hospital-name">
+                        ${h.hospital_name}
+                        ${h.is_full_bed ? '<span class="full-bed-badge">滿床通報</span>' : ''}
+                    </div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">住院等待</span>
+                            <span class="metric-value high">${h.inpatient_waiting}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">推床等待</span>
+                            <span class="metric-value">${h.stretcher_waiting}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // 2. 處理側邊列表
+            const fullList = document.getElementById('full-list');
+            fullList.innerHTML = latestData.map(h => {
+                const wait = parseInt(h.inpatient_waiting);
+                let statusClass = '';
+                if (wait > 50) statusClass = 'danger';
+                else if (wait > 20) statusClass = 'warning';
+
+                return `
+                <div class="stat-card ${statusClass}" style="margin-bottom: 1rem; padding: 1rem;">
+                    <div class="hospital-name" style="font-size: 1rem;">
+                        ${h.hospital_name}
+                        <span style="font-size: 0.8rem; color: var(--text-dim)">ICU: ${h.icu_waiting}</span>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric-item">
+                            <span class="metric-label">住院等待</span>
+                            <span class="metric-value" style="font-size: 1.2rem;">${h.inpatient_waiting}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">看診等待</span>
+                            <span class="metric-value" style="font-size: 1.2rem;">${h.outpatient_waiting}</span>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            // 3. 繪製圖表
+            updateChart();
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+
+            // 取最近 5 次更新的趨勢
+            const recentBatches = scraperData.slice(-10);
+            const labels = recentBatches.map(b => b.date.split(' ')[1]); // 只取時間
+
+            // 取目前住院人數最多的 5 間醫院
+            const top5Names = [...scraperData[scraperData.length - 1].records]
+                .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
+                .slice(0, 5)
+                .map(h => h.hospital_name);
+
+            const datasets = top5Names.map((name, index) => {
+                const colors = ['#38bdf8', '#fb7185', '#34d399', '#fbbf24', '#a78bfa'];
+                return {
+                    label: name,
+                    data: recentBatches.map(b => {
+                        const record = b.records.find(r => r.hospital_name === name);
+                        return record ? parseInt(record.inpatient_waiting) : 0;
+                    }),
+                    borderColor: colors[index],
+                    backgroundColor: colors[index] + '22',
+                    fill: true,
+                    tension: 0.4
+                };
+            });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { family: 'Outfit' } } }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = initDashboard;
+    </script>
+</body>
+
+</html>

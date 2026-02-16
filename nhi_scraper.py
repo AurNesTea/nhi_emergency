@@ -122,8 +122,14 @@ class NHIMedicalCenterScraper:
         
         # 自動下載並設定 ChromeDriver
         try:
-            # 優先檢查環境變數 (Docker 環境)
             import os
+            # 關鍵：如果在 GitHub Actions 環境，強制使用 headless
+            if os.environ.get('GITHUB_ACTIONS'):
+                chrome_options.add_argument('--headless=new')
+                chrome_options.add_argument('--no-sandbox')
+                chrome_options.add_argument('--disable-dev-shm-usage')
+
+            # 優先檢查環境變數 (Docker 環境)
             chrome_bin = os.environ.get('CHROME_BIN')
             chromedriver_path = os.environ.get('CHROMEDRIVER_PATH')
 
@@ -497,14 +503,26 @@ class NHIMedicalCenterScraper:
             csv_file = self.save_to_csv()
             json_file = self.save_to_json()
             
-            # 9. 發送 Email 通知 (優先於資料庫寫入)
-            if csv_file:
+            # 9. 發送 Email 通知 (檢測環境)
+            if csv_file and not os.environ.get('GITHUB_ACTIONS'):
                 logger.info("正在發送 Email 通知...")
                 self.send_email(csv_file)
+            elif os.environ.get('GITHUB_ACTIONS'):
+                logger.info("GitHub Actions 環境：跳過發送 Email。")
 
-            # 10. 寫入資料庫 (隔離錯誤)
-            logger.info("正在寫入資料庫...")
-            self.save_to_database()
+            # 10. 寫入資料庫 (檢測環境)
+            if not os.environ.get('GITHUB_ACTIONS'):
+                logger.info("正在寫入資料庫...")
+                self.save_to_database()
+            else:
+                logger.info("GitHub Actions 環境：跳過 PostgreSQL 寫入。")
+
+            # 11. 更新前端網頁資料 (必做，因為 GitHub Pages 需要它)
+            try:
+                from update_web_data import export_to_web_data
+                export_to_web_data(new_data=self.data)
+            except Exception as e:
+                logger.warning(f"更新前端資料失敗: {e}")
             
             # 統計資訊
             end_time = datetime.now()

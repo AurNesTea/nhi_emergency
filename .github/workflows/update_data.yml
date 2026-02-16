@@ -1,0 +1,56 @@
+name: NHI Scraper - Daily Update
+
+on:
+  schedule:
+    # 這裡使用 UTC 時間。台北時間 (UTC+8) 的 09:00 和 16:00
+    # 09:00 Taipei -> 01:00 UTC
+    # 16:00 Taipei -> 08:00 UTC
+    - cron: '0 1,8 * * *'
+  workflow_dispatch: # 支援手動觸發測試
+
+permissions:
+  contents: write
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Scraper
+      env:
+        # 標記當前為 GitHub Actions 環境，程式會自動跳過寄信與資料庫
+        GITHUB_ACTIONS: "true"
+      run: |
+        python nhi_scraper.py
+
+    - name: Commit and Push changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        
+        # 加入更新後的資料檔案
+        git add data/ index.html data.js
+        
+        # 檢查是否有變更需要 commit
+        if git diff --cached --quiet; then
+          echo "No changes to commit."
+        else
+          git commit -m "auto: daily data update $(date +'%Y-%m-%d %H:%M')"
+          git push
+        fi
