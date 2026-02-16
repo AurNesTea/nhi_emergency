@@ -11,7 +11,11 @@ echo 時間: %date% %time%
 echo ===========================================
 
 :: 2. 直接使用完整路徑執行 (這是最穩且不會跳過的方法)
-"D:\Kevin\nhi_emergency\.venv\Scripts\python.exe" nhi_scraper.py
+if exist ".venv\Scripts\python.exe" (
+    ".venv\Scripts\python.exe" main.py
+) else (
+    python main.py
+)
 
 :: 3. 檢查執行結果
 if %errorlevel% neq 0 (

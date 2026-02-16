@@ -4,8 +4,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-# 將專案目錄加入路徑
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# 將專案根目錄加入路徑，確保可以引用 src
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.config import WEB_DATA_FILE
 
 def export_to_web_data(limit=100, new_data=None):
     """
@@ -13,12 +15,12 @@ def export_to_web_data(limit=100, new_data=None):
     - 如果有資料庫，優先從資料庫撈取 (本地/Docker 調試)
     - 如果沒有資料庫 (GitHub Actions)，從現有的 data.js 讀取並追加最新結果
     """
-    output_path = Path(__file__).parent / "data.js"
+    output_path = WEB_DATA_FILE
     
     # 嘗試從資料庫讀取
     try:
-        from database import SessionLocal
-        from models import MedicalCenterRecord
+        from src.models.database import SessionLocal
+        from src.models.medical_center import MedicalCenterRecord
         db = SessionLocal()
         all_records = db.query(MedicalCenterRecord).order_by(MedicalCenterRecord.created_at.asc()).all()
         

@@ -37,7 +37,7 @@ jobs:
         # 標記當前為 GitHub Actions 環境，程式會自動跳過寄信與資料庫
         GITHUB_ACTIONS: "true"
       run: |
-        python nhi_scraper.py
+        python main.py
 
     - name: Commit and Push changes
       run: |

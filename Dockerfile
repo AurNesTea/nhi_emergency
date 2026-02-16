@@ -36,4 +36,4 @@ COPY . .
 RUN mkdir -p data logs
 
 # 設定預設指令
-CMD ["python", "nhi_scraper.py"]
+CMD ["python", "main.py"]

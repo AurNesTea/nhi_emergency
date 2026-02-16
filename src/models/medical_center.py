@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from datetime import datetime
-from database import Base
+from src.models.database import Base
 
 class MedicalCenterRecord(Base):
     """
