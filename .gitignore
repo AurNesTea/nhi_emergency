@@ -26,9 +26,9 @@ env/
 ENV/
 
 # Project Specific
-config.py
+# config.py (Removed to allow src/config.py)
 logs/
-data/
+# data/ (Removed to allow history data and CSVs)
 .DS_Store
 utils/
 backup/
