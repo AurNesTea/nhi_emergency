@@ -75,7 +75,7 @@
 - [X] 建立 `src/` 目錄結構
 - [X] 拆分 `models`, `services` 模組
 - [X] 統一入口點 `main.py`
-- [X] 優化 GitHub Actions Workflow
+- [X] 優化 GitHub Actions Workflow 並驗證通過 (2026-02-17)
 
 ## 第六階段：未來可做功能 (Future)
 

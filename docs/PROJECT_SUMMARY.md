@@ -15,10 +15,11 @@
 - **Configuration**: `src/config.py` (統一管理環境變數)
 
 ### 部署模式
-1.  **GitHub Actions (Serverless) - 推薦**
+1.  **GitHub Actions (Serverless) - [已驗證通過 ✅]**
     - 全自動每日爬取 (09:00, 16:00)
-    - 資料儲存於 `data.js` (Git GitOps)
-    - 前端透過 GitHub Pages 託管
+    - 資料儲存於 `data.js` 與 `data/` 歷史資料夾 (Git GitOps)
+    - 前端透過 GitHub Pages 託管：[線上連結](https://aurnestea.github.io/nhi_emergency/)
+    - **特別紀錄**: 已修正 `.gitignore` 以追蹤 `src/config.py` 與歷史資料，確保 CI/CD 環境完整。
 2.  **Docker (Container)**
     - 包含 PostgreSQL 資料庫
     - 適合本地開發與完整資料保存
