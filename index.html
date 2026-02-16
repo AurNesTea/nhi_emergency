@@ -182,6 +182,31 @@
             letter-spacing: 0.1em;
         }
 
+        /* 免責聲明樣式 */
+        .disclaimer-footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem 1rem 0 0;
+            color: var(--text-dim);
+        }
+
+        .disclaimer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 0.85rem;
+        }
+
+        .disclaimer-content ul {
+            margin: 1rem 0;
+            padding-left: 1.2rem;
+        }
+
+        .disclaimer-content li {
+            margin-bottom: 0.5rem;
+        }
+
         /* 響應式 */
         @media (max-width: 992px) {
             .dashboard-content {
@@ -223,7 +248,21 @@
             <div class="stats-grid" id="full-list">
                 <!-- 列表由 JS 生成 -->
             </div>
-        </section>
+            <footer class="disclaimer-footer">
+                <div class="disclaimer-content">
+                    <p><strong>【免責聲明】</strong></p>
+                    <ul>
+                        <li>本網頁呈現之資料僅供參考，實際急診壅塞狀況與等待時間請以各醫療院所現場公告為準。</li>
+                        <li>資料來源：<a href="https://info.nhi.gov.tw/INAE4000/INAE4001S01" target="_blank"
+                                style="color: var(--primary); text-decoration: none;">衛生福利部中央健康保險署 - 特約醫療院所資訊查詢</a>。
+                        </li>
+                        <li>本系統透過自動化技術收集公開資訊，不代表健保署或任何醫療單位之官方正式報告。</li>
+                        <li>重大傷病或緊急急診需求，請立即撥打 119 或聯繫當地救護單位，切勿僅依據本網頁資訊做出醫療決策。</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-dim);">&copy; 2026 NHI Emergency Monitor Project |
+                        Data for Research Only</p>
+                </div>
+            </footer>
     </div>
 
     <!-- 載入資料 -->
