@@ -292,43 +292,84 @@
         function updateChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
 
-            // 取最近 5 次更新的趨勢
-            const recentBatches = scraperData.slice(-10);
-            const labels = recentBatches.map(b => b.date.split(' ')[1]); // 只取時間
+            // 關鍵修改：過濾出每天早上 09:xx 的資料 (考慮到執行時間可能有落差，包含 08: 或 09:)
+            const morningBatches = scraperData.filter(b => b.date.includes(' 09:') || b.date.includes(' 08:'));
 
-            // 取目前住院人數最多的 5 間醫院
-            const top5Names = [...scraperData[scraperData.length - 1].records]
-                .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
-                .slice(0, 5)
-                .map(h => h.hospital_name);
+            // 只取最近 14 天的早上
+            const trendData = morningBatches.slice(-14);
+            const labels = trendData.map(b => b.date.split(' ')[0].split('-').slice(1).join('-')); // 只取 MM-DD
 
-            const datasets = top5Names.map((name, index) => {
-                const colors = ['#38bdf8', '#fb7185', '#34d399', '#fbbf24', '#a78bfa'];
+            // 取得所有醫院名稱
+            const allHospitalNames = trendData.length > 0
+                ? trendData[trendData.length - 1].records.map(r => r.hospital_name)
+                : [];
+
+            // 產生成員顏色 (調色盤)
+            const getColor = (i) => {
+                const colors = [
+                    '#38bdf8', '#fb7185', '#34d399', '#fbbf24', '#a78bfa',
+                    '#2dd4bf', '#f472b6', '#60a5fa', '#f87171', '#c084fc'
+                ];
+                return colors[i % colors.length];
+            };
+
+            const datasets = allHospitalNames.map((name, index) => {
+                const color = getColor(index);
+                // 預設只顯示住院人數最多的前 5 名，其餘預設隱藏 (Hidden)
+                const isTop5 = [...trendData[trendData.length - 1].records]
+                    .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
+                    .slice(0, 5)
+                    .some(r => r.hospital_name === name);
+
                 return {
                     label: name,
-                    data: recentBatches.map(b => {
+                    data: trendData.map(b => {
                         const record = b.records.find(r => r.hospital_name === name);
                         return record ? parseInt(record.inpatient_waiting) : 0;
                     }),
-                    borderColor: colors[index],
-                    backgroundColor: colors[index] + '22',
-                    fill: true,
-                    tension: 0.4
+                    borderColor: color,
+                    backgroundColor: color + '22',
+                    fill: false,
+                    tension: 0.3,
+                    hidden: !isTop5 // 關鍵：不在此名單內的醫院預設隱藏
                 };
             });
 
-            new Chart(ctx, {
+            // 更新標題
+            document.querySelector('.main-visual h2').innerText = '近 14 日早晨住院等待趨勢 (點擊標籤可切換醫院)';
+
+            if (window.myChart) window.myChart.destroy();
+            window.myChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels, datasets },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { labels: { color: '#94a3b8', font: { family: 'Outfit' } } }
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                boxWidth: 10,
+                                font: { family: 'Outfit', size: 10 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleFont: { size: 14 },
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} 人`;
+                                }
+                            }
+                        }
                     },
                     scales: {
                         y: {
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8' }
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: '住院等待人數', color: '#64748b' }
                         },
                         x: {
                             grid: { display: false },
