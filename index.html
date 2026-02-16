@@ -107,6 +107,10 @@
             background: var(--warning);
         }
 
+        .stat-card.success::after {
+            background: var(--success);
+        }
+
         .hospital-name {
             font-size: 1.25rem;
             font-weight: 600;
@@ -153,6 +157,10 @@
             color: var(--warning);
         }
 
+        .metric-value.low {
+            color: var(--success);
+        }
+
         .dashboard-content {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -197,7 +205,7 @@
         </header>
 
         <section class="overview">
-            <h2>即時告警 (住院等待 > 30人)</h2>
+            <h2>住院等待 > 30人</h2>
             <div class="stats-grid" id="alert-grid" style="margin-bottom: 2rem;">
                 <!-- 警告卡片由 JS 動態生成 -->
             </div>
@@ -235,18 +243,30 @@
 
             // 1. 處理警告卡片
             const alertGrid = document.getElementById('alert-grid');
-            const alertHospitals = latestData.filter(h => parseInt(h.inpatient_waiting) > 30);
+            const alertHospitals = latestData.filter(h => h.is_full_bed || parseInt(h.inpatient_waiting) > 30);
 
-            alertGrid.innerHTML = alertHospitals.map(h => `
-                <div class="stat-card danger">
+            alertGrid.innerHTML = alertHospitals.map(h => {
+                const isFull = h.is_full_bed;
+                const wait = parseInt(h.inpatient_waiting);
+
+                let statusClass = 'warning';
+                let valueClass = 'med';
+
+                if (isFull) {
+                    statusClass = 'danger';
+                    valueClass = 'high';
+                }
+
+                return `
+                <div class="stat-card ${statusClass}">
                     <div class="hospital-name">
                         ${h.hospital_name}
-                        ${h.is_full_bed ? '<span class="full-bed-badge">滿床通報</span>' : ''}
+                        ${isFull ? '<span class="full-bed-badge">滿床通報</span>' : ''}
                     </div>
                     <div class="metrics">
                         <div class="metric-item">
                             <span class="metric-label">住院等待</span>
-                            <span class="metric-value high">${h.inpatient_waiting}</span>
+                            <span class="metric-value ${valueClass}">${h.inpatient_waiting}</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">推床等待</span>
@@ -254,15 +274,25 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             // 2. 處理側邊列表
             const fullList = document.getElementById('full-list');
             fullList.innerHTML = latestData.map(h => {
+                const isFull = h.is_full_bed;
                 const wait = parseInt(h.inpatient_waiting);
-                let statusClass = '';
-                if (wait > 50) statusClass = 'danger';
-                else if (wait > 20) statusClass = 'warning';
+
+                let statusClass = 'success';
+                let valueClass = 'low';
+
+                if (isFull) {
+                    statusClass = 'danger';
+                    valueClass = 'high';
+                } else if (wait >= 30) {
+                    statusClass = 'warning';
+                    valueClass = 'med';
+                }
 
                 return `
                 <div class="stat-card ${statusClass}" style="margin-bottom: 1rem; padding: 1rem;">
@@ -273,7 +303,7 @@
                     <div class="metrics">
                         <div class="metric-item">
                             <span class="metric-label">住院等待</span>
-                            <span class="metric-value" style="font-size: 1.2rem;">${h.inpatient_waiting}</span>
+                            <span class="metric-value ${valueClass}" style="font-size: 1.2rem;">${h.inpatient_waiting}</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">看診等待</span>
