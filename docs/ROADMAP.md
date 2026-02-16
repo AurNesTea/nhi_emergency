@@ -43,13 +43,24 @@
 - [x] 實作 PostgreSQL 連線邏輯 (`database.py`)
 - [x] 容器化部署 (Docker + docker-compose)
 
-## 第四階段：前端視覺化 (Future)
-> 目標：建立現代化的網頁介面與資訊儀表板。
+## 第四階段：前端視覺化 (Completed - v4.0)
+> **完成日期**: 2026-02-16
+> **目標**: 建立現代化的網頁介面與資訊儀表板。
 
-### 2. 前端視覺化 (Dashboard)
-- [ ] 設計資訊儀表板 (Dashboard)
-- [ ] 視覺化呈現：
-    - 各醫院即時等待人數長條圖
-    - 北中南東區域負載熱圖
-    - 歷史趨勢圖 (Trend Analysis)
-- [ ] 技術選型：現代化 Web 框架 (React/Vue 或 Python Based Dashboard)
+### 1. 資訊儀表板 (Dashboard)
+- [x] 設計深色主題戰情室 (Dark Mode Dashboard)
+- [x] 視覺化呈現：
+    - [x] 即時告警卡片 (紅燈/黃燈/綠燈機制)
+    - [x] 全台 28 家醫學中心網格概覽
+    - [x] 近 14 日早晨住院等待趨勢圖 (Chart.js)
+- [x] 自動化部署 (GitHub Pages)
+
+## 第五階段：未來展望 (Future)
+
+### 1. 資料存取增強
+- [ ] Google Sheets 整合 (作為簡易資料庫與協作介面)
+- [ ] API 開發 (提供 JSON API 供第三方串接)
+
+### 2. 進階分析
+- [ ] 北中南東區域負載熱圖
+- [ ] 預測模型 (預測未來一週的急診高峰)

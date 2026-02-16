@@ -1,12 +1,33 @@
-# Windows 部署指南
-
-> **目標環境**: Windows 10/11  
-> **部署時間**: 約 15-20 分鐘  
-> **技術需求**: Python 3.8+, Chrome 瀏覽器
+> **目標平台**: GitHub (Primary) / Windows / Docker  
+> **部署時間**: ~5 分鐘 (GitHub Actions)  
 
 ---
 
-## Docker 部署 (推薦)
+## 1. 雲端全自動部署 (GitHub Actions) - **推薦**
+
+這是目前的正式環境部署方式，完全無需本地資源。
+
+### 1-1. 啟用 GitHub Pages
+1. 在您的 GitHub Repository 中，進入 **Settings** > **Pages**。
+2. 在 **Build and deployment** 下的 **Branch** 選擇 `main` (或 `master`)。
+3. 點擊 **Save**。
+
+### 1-2. 自動排程說明
+本專案已內建 `.github/workflows/update_data.yml`，會自動執行以下工作：
+1. **每日定時**: 每天 09:00 與 16:00 (UTC 01:00, 08:00) 自動啟動。
+2. **執行爬蟲**: 使用 Headless Chrome 抓取健保署資料。
+3. **更新數據**: 將新資料寫入 `data/` 與 `data.js`。
+4. **自動部署**: 將變更 Push 回 Repository，觸發 GitHub Pages 更新網頁。
+
+### 1-3. 手動觸發
+若需立即更新數據：
+1. 進入 Repository 的 **Actions** 頁籤。
+2. 選擇左側的 **Daily NHI Data Scraper**。
+3. 點擊右側的 **Run workflow** 按鈕。
+
+---
+
+## 2. Docker 部署 (本地開發/測試)
 
 這是最穩定且跨平台的部署方式，無需在主機安裝 Python 環境。
 

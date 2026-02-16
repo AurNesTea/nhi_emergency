@@ -1,63 +1,48 @@
 # 健保署醫學中心爬蟲 (NHI Medical Center Scraper)
 
-> **專案狀態**: Production Ready (v3.0 - Database & Docker Support)  
-> **最新更新**: 2026-02-13  
-> **技術核心**: Python 3.10, Selenium, PostgreSQL, Docker
+> **專案狀態**: Production Ready (v4.0 - Serverless Dashboard)  
+> **最新更新**: 2026-02-16  
+> **技術核心**: GitHub Actions, GitHub Pages, Python, Chart.js, Serverless
 
 ## 專案概述
 
-本專案旨在自動化抓取健保署網站上全台 28 家醫學中心的即時等待人數資料，並支援自動化排程、Email 通知與資料庫長期儲存。
+本專案是一個全自動化的**醫學中心急診戰情室**。透過 GitHub Actions 每日定時抓取健保署即時數據，並自動佈署至 GitHub Pages，提供全台 28 家醫學中心的急診等待人數視覺化監控。
 
 **主要功能：**
-*   **高效爬蟲**: 使用 Selenium + Headless Chrome，支援自動重試與錯誤隔離。
-*   **混合儲存**:
-    *   **資料庫**: 透過 SQLAlchemy ORM 寫入 PostgreSQL，適合長期分析。
-    *   **檔案備份**: 保留 CSV 與 JSON 格式的單次快照。
-*   **容器化部署**: 提供 `Dockerfile` 與 `docker-compose.yml`，一鍵啟動所有服務 (App + DB)。
-*   **模組化架構**: 分離基礎建設 (`database.py`) 與業務模型 (`models.py`)，便於擴充。
-*   **Email 通知**: 抓取完成後自動寄送報表，即使資料庫連線失敗也能獨立運作。
+*   **全自動雲端運行**: 每日 09:00 與 16:00 自動執行爬蟲 (GitHub Actions)，無需本地伺服器。
+*   **Serverless 資料庫**: 使用 `data.js` 作為輕量級資料儲存，前端直接讀取，零資料庫維護成本。
+*   **即時戰情室**:
+    *   **紅燈警示**: 自動標記「滿床通報」與「等待人數 > 30」的緊急醫院。
+    *   **趨勢分析**: 提供近 14 日的早晨住院等待人數趨勢圖。
+    *   **RWD 設計**: 支援手機與桌機的響應式網頁 (Dark Mode)。
+*   **混合模式**: 支援本地開發 (Docker + PostgreSQL) 與雲端部署 (GitHub Actions + File-based) 雙模式切換。
 
 **資料來源**: [健保署特約醫療院所資訊查詢](https://info.nhi.gov.tw/INAE4000/INAE4001S01)
+**線上預覽**: [點擊查看即時戰情室](https://aurnestea.github.io/nhi_emergency/) (請替換為您的實際 Pages 網址)
 
 ---
 
-## 快速開始 (推薦使用 Docker)
+## 快速開始 (GitHub Actions 全自動模式)
 
-這是最簡單的部署方式，無需在本機安裝 Python 或 Chrome。
+本專案已設定好 CI/CD 流程，**您不需要在本地執行任何指令**即可運作。
 
-### 1. 環境需求
-*   Docker Desktop (Windows/Mac) 或 Docker Engine (Linux)
+### 1. 啟用 GitHub Pages
+1. 進入 GitHub Repository 的 **Settings** > **Pages**。
+2. 在 **Branch** 選擇 `main` (或 `master`) 並儲存。
+3. 等待幾分鐘後，GitHub 會提供您的專案網址。
 
-### 2. 啟動服務
+### 2. 啟用 Actions
+專案內建 `.github/workflows/update_data.yml`，預設會每天自動執行。
+*   您可以到 **Actions** 頁籤手動觸發 `Run workflow` 來測試。
 
-```bash
-# 下載專案
-git clone [repository_url]
-cd nhi_emergency
-
-# 啟動服務 (背景執行)
-docker-compose up -d --build
-```
-
-此指令將自動：
-1.  啟動 PostgreSQL 資料庫 (主機埠 5432)
-2.  建置並啟動爬蟲容器
-3.  自動執行第一次抓取
-4.  將資料與日誌掛載回本機 (`data/` 與 `logs/`)
-
-### 3. 查看狀態
-
-```bash
-# 查看爬蟲日誌
-docker-compose logs -f scraper
-
-# 檢查資料庫內容
-docker-compose exec db psql -U postgres -d nhi_emergency -c "SELECT * FROM medical_center_records ORDER BY id DESC LIMIT 5;"
-```
+### 3. 查看結果
+開啟您的 GitHub Pages 網址，即可看到最新的急診等待數據。
 
 ---
 
-## 傳統部署 (Windows/Mac 本機執行)
+## 本地開發 (Docker)
+
+如果您需要修改程式碼或在本機測試：
 
 若不使用 Docker，請參考以下步驟：
 
