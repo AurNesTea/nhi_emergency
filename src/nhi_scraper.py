@@ -344,7 +344,11 @@ class NHIMedicalCenterScraper:
                 from src.services.data_service import export_to_web_data
                 export_to_web_data(new_data=self.data)
             except Exception as e:
-                logger.warning(f"更新前端資料失敗: {e}")
+                logger.error(f"更新前端資料失敗: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
+                # 若前端資料更新失敗，視為本次任務失敗
+                return False
             
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
@@ -370,9 +374,11 @@ def main():
     if success:
         print("\n爬蟲執行成功！")
         print(f"資料已儲存至 {Path('data').absolute()}")
+        sys.exit(0)
     else:
         print("\n爬蟲執行失敗，請查看日誌檔案")
         print(f"日誌位置: {LOG_FILE}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

@@ -49,7 +49,8 @@ def export_to_web_data(limit=100, new_data=None):
             print(f"從資料庫匯出成功：{output_path}")
             return
     except Exception:
-        print("無法從資料庫讀取，嘗試檔案追加模式 (針對 GitHub Actions)")
+        # print("無法從資料庫讀取，嘗試檔案追加模式 (針對 GitHub Actions)")
+        pass
 
     # 檔案追加模式 (適用於無資料庫環境)
     current_data = []
@@ -62,6 +63,8 @@ def export_to_web_data(limit=100, new_data=None):
                 current_data = json.loads(json_str)
         except Exception as e:
             print(f"讀取現有 data.js 失敗: {e}")
+            import traceback
+            traceback.print_exc()
 
     # 加入新抓取的資料
     if new_data:
