@@ -360,11 +360,28 @@
         function updateChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
 
-            // 關鍵修改：過濾出每天早上 09:xx 的資料 (考慮到執行時間可能有落差，包含 08: 或 09:)
-            const morningBatches = scraperData.filter(b => b.date.includes(' 09:') || b.date.includes(' 08:'));
+            // 關鍵修改：每天只取一筆「11:00 AM 前」的最新資料
+            const dailyDataMap = new Map();
 
-            // 只取最近 14 天的早上
-            const trendData = morningBatches.slice(-14);
+            scraperData.forEach(batch => {
+                const dateObj = new Date(batch.date); // 假設 date 格式為 'YYYY-MM-DD HH:mm:ss'
+                const dateKey = batch.date.split(' ')[0]; // YYYY-MM-DD
+                const hour = dateObj.getHours();
+
+                // 只考慮 11:00 前的資料
+                if (hour < 11) {
+                    // 如果該日期還沒存過，或者這筆資料比已存的更晚（更接近 11:00），就更新
+                    if (!dailyDataMap.has(dateKey) || new Date(dailyDataMap.get(dateKey).date) < dateObj) {
+                        dailyDataMap.set(dateKey, batch);
+                    }
+                }
+            });
+
+            // 將 Map 轉回 Array 並排序
+            const trendData = Array.from(dailyDataMap.values())
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .slice(-14); // 取最近 14 天
+
             const labels = trendData.map(b => b.date.split(' ')[0].split('-').slice(1).join('-')); // 只取 MM-DD
 
             // 取得所有醫院名稱
