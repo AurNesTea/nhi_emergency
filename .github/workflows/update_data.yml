@@ -2,10 +2,9 @@ name: NHI Scraper - Daily Update
 
 on:
   schedule:
-    # 這裡使用 UTC 時間。台北時間 (UTC+8) 的 09:00 和 16:00
-    # 09:00 Taipei -> 01:00 UTC
-    # 16:00 Taipei -> 08:00 UTC
-    - cron: '0 1,8 * * *'
+    # 08:55 Taipei -> 00:55 UTC
+    # 15:55 Taipei -> 07:55 UTC
+    - cron: '55 0,7 * * *'
   workflow_dispatch: # 支援手動觸發測試
 
 permissions:

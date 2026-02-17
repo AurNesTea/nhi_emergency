@@ -1245,11 +1245,11 @@ const scraperData = [
     ]
   },
   {
-    "date": "2026-02-17 02:16:57",
+    "date": "2026-02-17 09:00:00",
     "records": [
       {
         "hospital_name": "臺大",
-        "inpatient_waiting": "48",
+        "inpatient_waiting": "47",
         "outpatient_waiting": "0",
         "stretcher_waiting": "0",
         "icu_waiting": "1",
@@ -1265,8 +1265,8 @@ const scraperData = [
       },
       {
         "hospital_name": "三總",
-        "inpatient_waiting": "7",
-        "outpatient_waiting": "1",
+        "inpatient_waiting": "9",
+        "outpatient_waiting": "0",
         "stretcher_waiting": "0",
         "icu_waiting": "0",
         "is_full_bed": false
@@ -1290,7 +1290,7 @@ const scraperData = [
       {
         "hospital_name": "台北馬偕",
         "inpatient_waiting": "6",
-        "outpatient_waiting": "2",
+        "outpatient_waiting": "1",
         "stretcher_waiting": "0",
         "icu_waiting": "0",
         "is_full_bed": false
@@ -1345,8 +1345,8 @@ const scraperData = [
       },
       {
         "hospital_name": "部立雙和",
-        "inpatient_waiting": "5",
-        "outpatient_waiting": "1",
+        "inpatient_waiting": "2",
+        "outpatient_waiting": "2",
         "stretcher_waiting": "0",
         "icu_waiting": "1",
         "is_full_bed": false
@@ -1369,8 +1369,8 @@ const scraperData = [
       },
       {
         "hospital_name": "中榮",
-        "inpatient_waiting": "2",
-        "outpatient_waiting": "3",
+        "inpatient_waiting": "4",
+        "outpatient_waiting": "2",
         "stretcher_waiting": "0",
         "icu_waiting": "0",
         "is_full_bed": false
@@ -1425,8 +1425,8 @@ const scraperData = [
       },
       {
         "hospital_name": "永康奇美",
-        "inpatient_waiting": "8",
-        "outpatient_waiting": "4",
+        "inpatient_waiting": "9",
+        "outpatient_waiting": "1",
         "stretcher_waiting": "0",
         "icu_waiting": "1",
         "is_full_bed": false
@@ -1434,7 +1434,7 @@ const scraperData = [
       {
         "hospital_name": "高雄榮總",
         "inpatient_waiting": "5",
-        "outpatient_waiting": "2",
+        "outpatient_waiting": "1",
         "stretcher_waiting": "0",
         "icu_waiting": "0",
         "is_full_bed": false
@@ -1442,7 +1442,7 @@ const scraperData = [
       {
         "hospital_name": "高雄長庚",
         "inpatient_waiting": "7",
-        "outpatient_waiting": "6",
+        "outpatient_waiting": "2",
         "stretcher_waiting": "0",
         "icu_waiting": "4",
         "is_full_bed": false
