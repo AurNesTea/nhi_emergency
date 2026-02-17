@@ -207,6 +207,109 @@
             margin-bottom: 0.5rem;
         }
 
+        /* 醫院篩選器樣式 */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .visuals h2 {
+            margin-bottom: 0;
+            font-size: 1.2rem;
+        }
+
+        .hospital-selector {
+            position: relative;
+            display: inline-block;
+        }
+
+        .selector-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .selector-btn:hover {
+            border-color: var(--primary);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #1e293b;
+            min-width: 250px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            z-index: 100;
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.25rem;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-dim);
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            color: var(--text-dim);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .dropdown-item input {
+            margin-right: 0.5rem;
+            accent-color: var(--primary);
+        }
+
         /* 響應式 */
         @media (max-width: 992px) {
             .dashboard-content {
@@ -238,7 +341,28 @@
 
         <section class="visuals">
             <div class="chart-container" style="height: 450px;">
-                <h2>近 14 日早晨住院等待趨勢 (點擊標籤可切換醫院)</h2>
+                <div class="chart-header">
+                    <h2>近 14 日早晨住院等待趨勢</h2>
+                    <div class="hospital-selector">
+                        <button class="selector-btn" onclick="toggleDropdown()">
+                            <span>篩選顯示醫院</span>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+                            </svg>
+                        </button>
+                        <div id="hospitalDropdown" class="dropdown-content">
+                            <div class="dropdown-actions">
+                                <button class="action-btn" onclick="selectAll(true)">全選</button>
+                                <button class="action-btn" onclick="selectAll(false)">全取消</button>
+                            </div>
+                            <div id="hospitalOptions">
+                                <!-- 選項由 JS 生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 移除 title 上的提示文字，因為已有篩選器 -->
                 <canvas id="mainChart"></canvas>
             </div>
         </section>
@@ -357,6 +481,47 @@
             updateChart();
         }
 
+        // 下拉選單控制
+        function toggleDropdown() {
+            document.getElementById("hospitalDropdown").classList.toggle("show");
+        }
+
+        // 點擊外部關閉選單
+        window.onclick = function (event) {
+            if (!event.target.closest('.hospital-selector')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function selectAll(checked) {
+            document.querySelectorAll('#hospitalOptions input[type="checkbox"]').forEach(cb => {
+                cb.checked = checked;
+            });
+            updateChartVisibility();
+        }
+
+        function updateChartVisibility() {
+            if (!window.myChart) return;
+
+            const checkboxes = document.querySelectorAll('#hospitalOptions input[type="checkbox"]');
+            checkboxes.forEach((cb, index) => {
+                // Chart.js 的 hidden 屬性邏輯是：true=隱藏, false=顯示
+                // 所以 checked=true 時，hidden 應該是 false
+                // 但要確保 dataset 順序與 checkbox順序一致
+                const dataset = window.myChart.data.datasets.find(ds => ds.label === cb.value);
+                if (dataset) {
+                    dataset.hidden = !cb.checked;
+                }
+            });
+            window.myChart.update();
+        }
+
         function updateChart() {
             const ctx = document.getElementById('mainChart').getContext('2d');
 
@@ -364,47 +529,65 @@
             const dailyDataMap = new Map();
 
             scraperData.forEach(batch => {
-                const dateObj = new Date(batch.date); // 假設 date 格式為 'YYYY-MM-DD HH:mm:ss'
-                const dateKey = batch.date.split(' ')[0]; // YYYY-MM-DD
+                const dateObj = new Date(batch.date);
+                const dateKey = batch.date.split(' ')[0];
                 const hour = dateObj.getHours();
 
-                // 只考慮 11:00 前的資料
                 if (hour < 11) {
-                    // 如果該日期還沒存過，或者這筆資料比已存的更晚（更接近 11:00），就更新
                     if (!dailyDataMap.has(dateKey) || new Date(dailyDataMap.get(dateKey).date) < dateObj) {
                         dailyDataMap.set(dateKey, batch);
                     }
                 }
             });
 
-            // 將 Map 轉回 Array 並排序
             const trendData = Array.from(dailyDataMap.values())
                 .sort((a, b) => new Date(a.date) - new Date(b.date))
-                .slice(-14); // 取最近 14 天
+                .slice(-14);
 
-            const labels = trendData.map(b => b.date.split(' ')[0].split('-').slice(1).join('-')); // 只取 MM-DD
+            const labels = trendData.map(b => b.date.split(' ')[0].split('-').slice(1).join('-'));
 
-            // 取得所有醫院名稱
             const allHospitalNames = trendData.length > 0
                 ? trendData[trendData.length - 1].records.map(r => r.hospital_name)
                 : [];
 
-            // 產生成員顏色 (調色盤)
+            // 1. 生成下拉選單選項
+            const optionsContainer = document.getElementById('hospitalOptions');
+            optionsContainer.innerHTML = ''; // 清空舊選項
+
+            // 找出前 5 名 (用來預設勾選)
+            const top5Names = [...trendData[trendData.length - 1].records]
+                .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
+                .slice(0, 5)
+                .map(r => r.hospital_name);
+
+            allHospitalNames.forEach(name => {
+                const isChecked = top5Names.includes(name);
+
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `
+                    <label style="cursor: pointer; display: flex; align-items: center; width: 100%;">
+                        <input type="checkbox" value="${name}" ${isChecked ? 'checked' : ''}>
+                        ${name}
+                    </label>
+                `;
+                div.querySelector('input').addEventListener('change', updateChartVisibility);
+                optionsContainer.appendChild(div);
+            });
+
+            // 2. 準備 Dataset
             const getColor = (i) => {
                 const colors = [
                     '#38bdf8', '#fb7185', '#34d399', '#fbbf24', '#a78bfa',
-                    '#2dd4bf', '#f472b6', '#60a5fa', '#f87171', '#c084fc'
+                    '#2dd4bf', '#f472b6', '#60a5fa', '#f87171', '#c084fc',
+                    '#a3e635', '#22d3ee', '#818cf8', '#e879f9', '#fb923c'
                 ];
                 return colors[i % colors.length];
             };
 
             const datasets = allHospitalNames.map((name, index) => {
                 const color = getColor(index);
-                // 預設只顯示住院人數最多的前 5 名，其餘預設隱藏 (Hidden)
-                const isTop5 = [...trendData[trendData.length - 1].records]
-                    .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
-                    .slice(0, 5)
-                    .some(r => r.hospital_name === name);
+                const isChecked = top5Names.includes(name);
 
                 return {
                     label: name,
@@ -416,13 +599,13 @@
                     backgroundColor: color + '22',
                     fill: false,
                     tension: 0.3,
-                    hidden: !isTop5 // 關鍵：不在此名單內的醫院預設隱藏
+                    hidden: !isChecked // 初始 hidden 狀態
                 };
             });
 
-            // 更新標題
-            const chartTitle = document.querySelector('.visuals h2');
-            if (chartTitle) chartTitle.innerText = '近 14 日早晨住院等待趨勢 (點擊標籤可切換醫院)';
+            // 3. 繪製圖表
+            // 移除舊標題邏輯，因為已經移到 chart-header 了
+            // const chartTitle = document.querySelector('.visuals h2');
 
             if (window.myChart) window.myChart.destroy();
             window.myChart = new Chart(ctx, {
@@ -435,10 +618,12 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
+                            onClick: null, // 關鍵：停用圖例點擊隱藏功能，只做靜態展示
                             labels: {
                                 color: '#94a3b8',
                                 boxWidth: 10,
-                                font: { family: 'Outfit', size: 10 }
+                                font: { family: 'Outfit', size: 10 },
+                                usePointStyle: true
                             }
                         },
                         tooltip: {
