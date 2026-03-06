@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>醫學中心急診等待趨勢</title>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-light: #ffffff;
+            --card-bg: #ffffff;
+            --primary: #0284c7;
+            --danger: #ef4444;
+            --text-main: #334155;
+            --text-dim: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background-color: transparent;
+            color: var(--text-main);
+            overflow: hidden;
+            /* Embed 模式隱藏捲軸 */
+        }
+
+        .chart-container-wrapper {
+            background: var(--bg-light);
+            padding: 1rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* 篩選天數按鈕 */
+        .days-filter {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        .days-btn {
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .days-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .days-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        /* 醫院選擇器 */
+        .hospital-selector {
+            position: relative;
+            display: inline-block;
+        }
+
+        .selector-btn {
+            background: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .selector-btn:hover {
+            border-color: var(--primary);
+            background: #f0f9ff;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: #ffffff;
+            min-width: 220px;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            z-index: 100;
+            margin-top: 0.25rem;
+            padding: 0.5rem;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        .dropdown-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.25rem;
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+
+        .action-btn:hover {
+            background: #e2e8f0;
+            color: var(--text-main);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 0.4rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+            color: var(--text-main);
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item:hover {
+            background: #f8fafc;
+        }
+
+        .dropdown-item input {
+            margin-right: 0.5rem;
+            accent-color: var(--primary);
+        }
+
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+            margin-top: 0.5rem;
+        }
+
+        .footer-note {
+            text-align: right;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .header-title-group {
+                gap: 0.5rem;
+            }
+
+            h2 {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chart-container-wrapper">
+        <div class="chart-header">
+            <div class="header-title-group">
+                <h2>早晨住院等待趨勢</h2>
+                <div class="days-filter">
+                    <button class="days-btn" data-days="7" onclick="setDays(7)">7天</button>
+                    <button class="days-btn active" data-days="14" onclick="setDays(14)">14天</button>
+                    <button class="days-btn" data-days="28" onclick="setDays(28)">28天</button>
+                </div>
+            </div>
+
+            <div class="hospital-selector">
+                <button class="selector-btn" onclick="toggleDropdown()">
+                    <span>篩選醫院</span>
+                    <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </button>
+                <div id="hospitalDropdown" class="dropdown-content">
+                    <div class="dropdown-actions">
+                        <button class="action-btn" onclick="selectAll(true)">全選</button>
+                        <button class="action-btn" onclick="selectAll(false)">清空</button>
+                    </div>
+                    <div id="hospitalOptions">
+                        <!-- Options generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="mainChart"></canvas>
+        </div>
+        <div class="footer-note">資料來源：衛福部健保署</div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // ==== [編輯需求專區] =======================================
+        let currentDays = 14;      // 預設顯示天數 (可以是 7, 14, 28)
+        let DEFAULT_TOP_N = 5;     // 預設顯示最壅塞家數 (如欲增減，請直接修改此數字)
+        // ==========================================================
+
+        let allHospitalNames = [];
+        let trendDataAll = [];
+        let selectedHospitals = new Set();
+        let isInitialized = false;
+
+        function initData() {
+            if (typeof scraperData === 'undefined') {
+                console.error("找不到 scraperData 資料");
+                return;
+            }
+
+            // 每天只取一筆「11:00 AM 前」的最新資料
+            const dailyDataMap = new Map();
+            scraperData.forEach(batch => {
+                const dateObj = new Date(batch.date);
+                const dateKey = batch.date.split(' ')[0];
+                const hour = dateObj.getHours();
+
+                if (hour < 11) {
+                    if (!dailyDataMap.has(dateKey) || new Date(dailyDataMap.get(dateKey).date) < dateObj) {
+                        dailyDataMap.set(dateKey, batch);
+                    }
+                }
+            });
+
+            // 儲存乾淨的時間序列資料，依據時間排序
+            trendDataAll = Array.from(dailyDataMap.values())
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (trendDataAll.length > 0) {
+                allHospitalNames = trendDataAll[trendDataAll.length - 1].records.map(r => r.hospital_name);
+
+                // 找出最新一天最壅塞的 Top N 家醫院
+                const topNHospitals = [...trendDataAll[trendDataAll.length - 1].records]
+                    .sort((a, b) => parseInt(b.inpatient_waiting) - parseInt(a.inpatient_waiting))
+                    .slice(0, DEFAULT_TOP_N)
+                    .map(r => r.hospital_name);
+
+                // 預設勾選這 Top N
+                selectedHospitals = new Set(topNHospitals);
+
+                renderDropdown();
+            }
+
+            isInitialized = true;
+            updateChart();
+        }
+
+        function renderDropdown() {
+            const optionsContainer = document.getElementById('hospitalOptions');
+            optionsContainer.innerHTML = '';
+
+            allHospitalNames.forEach(name => {
+                const isChecked = selectedHospitals.has(name);
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `
+                    <label style="cursor: pointer; display: flex; align-items: center; width: 100%;">
+                        <input type="checkbox" value="${name}" ${isChecked ? 'checked' : ''}>
+                        ${name}
+                    </label>
+                `;
+                div.querySelector('input').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedHospitals.add(name);
+                    } else {
+                        selectedHospitals.delete(name);
+                    }
+                    updateChart(); // 每次勾選改變，直接剔除或加入並重繪圖表
+                });
+                optionsContainer.appendChild(div);
+            });
+        }
+
+        function setDays(days) {
+            currentDays = days;
+
+            // 更新按鈕樣式
+            document.querySelectorAll('.days-btn').forEach(btn => {
+                if (parseInt(btn.getAttribute('data-days')) === days) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (isInitialized) updateChart();
+        }
+
+        function toggleDropdown() {
+            document.getElementById("hospitalDropdown").classList.toggle("show");
+        }
+
+        // 點擊外面關閉選單
+        window.onclick = function (event) {
+            if (!event.target.closest('.hospital-selector')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    if (dropdowns[i].classList.contains('show')) {
+                        dropdowns[i].classList.remove('show');
+                    }
+                }
+            }
+        }
+
+        function selectAll(checked) {
+            const checkboxes = document.querySelectorAll('#hospitalOptions input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+                if (checked) {
+                    selectedHospitals.add(cb.value);
+                } else {
+                    selectedHospitals.delete(cb.value);
+                }
+            });
+            updateChart();
+        }
+
+        function updateChart() {
+            if (!isInitialized) return;
+
+            const ctx = document.getElementById('mainChart').getContext('2d');
+
+            // 根據選擇的天數擷取資料 (確保不會拋錯)
+            const trendData = trendDataAll.slice(-currentDays);
+
+            // 改為 MM/DD 格式較節省手機版的 X 軸空間
+            const labels = trendData.map(b => b.date.split(' ')[0].split('-').slice(1).join('/'));
+
+            // 固定顏色字典，以防顏色亂跳
+            const getColor = (name) => {
+                const colors = [
+                    '#0ea5e9', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6',
+                    '#14b8a6', '#ec4899', '#3b82f6', '#ef4444', '#a855f7',
+                    '#84cc16', '#06b6d4', '#6366f1', '#d946ef', '#f97316'
+                ];
+                const idx = allHospitalNames.indexOf(name);
+                return colors[idx % colors.length];
+            };
+
+            // 【關鍵修改】：此處只針對有勾選 (Selected) 的醫院產生 dataset
+            const datasets = Array.from(selectedHospitals).map(name => {
+                const color = getColor(name);
+                return {
+                    label: name,
+                    data: trendData.map(b => {
+                        const record = b.records.find(r => r.hospital_name === name);
+                        return record ? parseInt(record.inpatient_waiting) : 0;
+                    }),
+                    borderColor: color,
+                    backgroundColor: color + '22',
+                    fill: false,
+                    tension: 0.3,
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                };
+            });
+
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+
+            window.myChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#475569', // Light theme 深灰色
+                                boxWidth: 12,
+                                font: { family: 'Outfit', size: 11 },
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            titleColor: '#0f172a',
+                            bodyColor: '#334155',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 10,
+                            boxPadding: 4,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.dataset.label}: ${context.parsed.y} 人`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: { color: '#64748b', font: { size: 10 } },
+                            title: { display: true, text: '住院等待人數', color: '#64748b', font: { size: 11 } },
+                            beginAtZero: true
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#64748b',
+                                font: { size: 10 },
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.onload = initData;
+    </script>
+</body>
+
+</html>
