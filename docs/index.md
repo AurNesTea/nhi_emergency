@@ -7,7 +7,13 @@
 | [ROADMAP.md](ROADMAP.md) | 開發路線圖與版本歷史 |
 | [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) | 專案架構總結與決策紀錄 |
 
-## 最近更新 (v5.0 - Refactoring)
+## 最近更新 (v5.1 - Data Sync & Maintenance)
+> **日期**: 2026-03-06
+
+- **資料庫同步**: 完成將 `temp_data` 歷史紀錄整併回 `data.js`，還原 29 個時段的數據，以確保前端折線圖 14 日趨勢的完整性。
+- **圖表分析盤點**: 確認目前 Dashboard 趨勢圖取值採用每日早晨 (11 AM前) 的快照數據。
+
+## 早前更新 (v5.0 - Refactoring)
 > **日期**: 2026-02-17
 
 - **架構重構**: 採用 MVC pattern 重組程式碼

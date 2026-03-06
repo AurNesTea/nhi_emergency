@@ -6,8 +6,8 @@
 > 祝各位代碼無 Bug，系統整年不亮紅燈！
 > ![Status](https://img.shields.io/badge/Status-Happy_New_Year-brightgreen)
 
-> **專案狀態**: Production Ready (v5.0 - MVC Refactor)
-> **最新更新**: 2026-02-17
+> **專案狀態**: Production Ready (v5.1 - Data Sync & Maintenance)
+> **最新更新**: 2026-03-06
 > **技術核心**: GitHub Actions, GitHub Pages, Python, Chart.js, Serverless
 
 ## 專案概述
