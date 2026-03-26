@@ -145,10 +145,6 @@ nhi_emergency/
 
 **A:** 可能是健保署網站維護或結構變更。請嘗試在 `config.py` 將 `headless` 設為 `False` 觀察瀏覽器行為，或查看 `logs/scraper.log`。
 
-### Q: 如何設定 Windows 排程？
-
-**A:** 請參考 [DEPLOYMENT.md](DEPLOYMENT.md) 中的詳細步驟。
-
 ---
 
 **開發與維護者**: Kevin Tsai
