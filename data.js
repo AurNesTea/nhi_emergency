@@ -1,234 +1,5 @@
 const scraperData = [
   {
-    "date": "2026-02-18 01:38:15",
-    "records": [
-      {
-        "hospital_name": "臺大",
-        "inpatient_waiting": "62",
-        "outpatient_waiting": "1",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "台大兒醫",
-        "inpatient_waiting": "0",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "三總",
-        "inpatient_waiting": "3",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "2",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "北榮",
-        "inpatient_waiting": "15",
-        "outpatient_waiting": "1",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "台北國泰",
-        "inpatient_waiting": "0",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "台北馬偕",
-        "inpatient_waiting": "5",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "馬偕兒醫",
-        "inpatient_waiting": "-",
-        "outpatient_waiting": "-",
-        "stretcher_waiting": "-",
-        "icu_waiting": "-",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "新光",
-        "inpatient_waiting": "1",
-        "outpatient_waiting": "2",
-        "stretcher_waiting": "0",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "亞東",
-        "inpatient_waiting": "26",
-        "outpatient_waiting": "4",
-        "stretcher_waiting": "7",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "台北慈濟",
-        "inpatient_waiting": "4",
-        "outpatient_waiting": "2",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "淡水馬偕",
-        "inpatient_waiting": "8",
-        "outpatient_waiting": "3",
-        "stretcher_waiting": "0",
-        "icu_waiting": "4",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "萬芳",
-        "inpatient_waiting": "7",
-        "outpatient_waiting": "2",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "部立雙和",
-        "inpatient_waiting": "12",
-        "outpatient_waiting": "1",
-        "stretcher_waiting": "0",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "臺大新竹",
-        "inpatient_waiting": "12",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "林口長庚",
-        "inpatient_waiting": "79",
-        "outpatient_waiting": "5",
-        "stretcher_waiting": "0",
-        "icu_waiting": "6",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "中榮",
-        "inpatient_waiting": "3",
-        "outpatient_waiting": "2",
-        "stretcher_waiting": "0",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "彰基",
-        "inpatient_waiting": "0",
-        "outpatient_waiting": "8",
-        "stretcher_waiting": "0",
-        "icu_waiting": "1",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "彰基兒醫",
-        "inpatient_waiting": "-",
-        "outpatient_waiting": "-",
-        "stretcher_waiting": "-",
-        "icu_waiting": "-",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "中國兒醫",
-        "inpatient_waiting": "-",
-        "outpatient_waiting": "-",
-        "stretcher_waiting": "-",
-        "icu_waiting": "-",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "中山附醫",
-        "inpatient_waiting": "6",
-        "outpatient_waiting": "3",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "中國附醫",
-        "inpatient_waiting": "24",
-        "outpatient_waiting": "8",
-        "stretcher_waiting": "0",
-        "icu_waiting": "5",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "成大",
-        "inpatient_waiting": "29",
-        "outpatient_waiting": "4",
-        "stretcher_waiting": "0",
-        "icu_waiting": "3",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "永康奇美",
-        "inpatient_waiting": "4",
-        "outpatient_waiting": "5",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "高雄榮總",
-        "inpatient_waiting": "5",
-        "outpatient_waiting": "4",
-        "stretcher_waiting": "0",
-        "icu_waiting": "2",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "高雄長庚",
-        "inpatient_waiting": "11",
-        "outpatient_waiting": "3",
-        "stretcher_waiting": "0",
-        "icu_waiting": "7",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "義大醫院",
-        "inpatient_waiting": "10",
-        "outpatient_waiting": "4",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "高醫",
-        "inpatient_waiting": "27",
-        "outpatient_waiting": "3",
-        "stretcher_waiting": "0",
-        "icu_waiting": "3",
-        "is_full_bed": false
-      },
-      {
-        "hospital_name": "花蓮慈濟",
-        "inpatient_waiting": "12",
-        "outpatient_waiting": "0",
-        "stretcher_waiting": "0",
-        "icu_waiting": "0",
-        "is_full_bed": true
-      }
-    ]
-  },
-  {
     "date": "2026-02-18 03:33:43",
     "records": [
       {
@@ -22893,6 +22664,235 @@ const scraperData = [
         "hospital_name": "花蓮慈濟",
         "inpatient_waiting": "52",
         "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "0",
+        "is_full_bed": true
+      }
+    ]
+  },
+  {
+    "date": "2026-03-30 09:03:13",
+    "records": [
+      {
+        "hospital_name": "臺大",
+        "inpatient_waiting": "69",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "台大兒醫",
+        "inpatient_waiting": "0",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "0",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "三總",
+        "inpatient_waiting": "37",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "4",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "北榮",
+        "inpatient_waiting": "23",
+        "outpatient_waiting": "1",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "台北國泰",
+        "inpatient_waiting": "20",
+        "outpatient_waiting": "1",
+        "stretcher_waiting": "12",
+        "icu_waiting": "2",
+        "is_full_bed": true
+      },
+      {
+        "hospital_name": "台北馬偕",
+        "inpatient_waiting": "36",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "馬偕兒醫",
+        "inpatient_waiting": "-",
+        "outpatient_waiting": "-",
+        "stretcher_waiting": "-",
+        "icu_waiting": "-",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "新光",
+        "inpatient_waiting": "21",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "0",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "亞東",
+        "inpatient_waiting": "25",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "17",
+        "icu_waiting": "3",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "台北慈濟",
+        "inpatient_waiting": "18",
+        "outpatient_waiting": "3",
+        "stretcher_waiting": "0",
+        "icu_waiting": "2",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "淡水馬偕",
+        "inpatient_waiting": "22",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "4",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "萬芳",
+        "inpatient_waiting": "27",
+        "outpatient_waiting": "4",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "部立雙和",
+        "inpatient_waiting": "40",
+        "outpatient_waiting": "4",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "臺大新竹",
+        "inpatient_waiting": "14",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "5",
+        "icu_waiting": "2",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "林口長庚",
+        "inpatient_waiting": "74",
+        "outpatient_waiting": "4",
+        "stretcher_waiting": "8",
+        "icu_waiting": "6",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "中榮",
+        "inpatient_waiting": "18",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "2",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "彰基",
+        "inpatient_waiting": "13",
+        "outpatient_waiting": "4",
+        "stretcher_waiting": "0",
+        "icu_waiting": "5",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "彰基兒醫",
+        "inpatient_waiting": "-",
+        "outpatient_waiting": "-",
+        "stretcher_waiting": "-",
+        "icu_waiting": "-",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "中國兒醫",
+        "inpatient_waiting": "-",
+        "outpatient_waiting": "-",
+        "stretcher_waiting": "-",
+        "icu_waiting": "-",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "中山附醫",
+        "inpatient_waiting": "14",
+        "outpatient_waiting": "1",
+        "stretcher_waiting": "0",
+        "icu_waiting": "0",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "中國附醫",
+        "inpatient_waiting": "11",
+        "outpatient_waiting": "6",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "成大",
+        "inpatient_waiting": "60",
+        "outpatient_waiting": "3",
+        "stretcher_waiting": "11",
+        "icu_waiting": "1",
+        "is_full_bed": true
+      },
+      {
+        "hospital_name": "永康奇美",
+        "inpatient_waiting": "40",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "高雄榮總",
+        "inpatient_waiting": "35",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "高雄長庚",
+        "inpatient_waiting": "91",
+        "outpatient_waiting": "0",
+        "stretcher_waiting": "0",
+        "icu_waiting": "3",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "義大醫院",
+        "inpatient_waiting": "16",
+        "outpatient_waiting": "5",
+        "stretcher_waiting": "0",
+        "icu_waiting": "1",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "高醫",
+        "inpatient_waiting": "34",
+        "outpatient_waiting": "2",
+        "stretcher_waiting": "0",
+        "icu_waiting": "0",
+        "is_full_bed": false
+      },
+      {
+        "hospital_name": "花蓮慈濟",
+        "inpatient_waiting": "43",
+        "outpatient_waiting": "0",
         "stretcher_waiting": "0",
         "icu_waiting": "0",
         "is_full_bed": true
